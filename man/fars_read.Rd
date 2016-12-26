@@ -19,8 +19,9 @@ into an R data.frame. A csv.bz2 file must exist in the working directory.
 Otherwise the function throws an error.
 }
 \examples{
-setwd("inst/extdata")
-fars_read(accident_2013.csv.bz2)
-fars_read(accident_2014.csv.bz2)
+
+\dontrun{
+fars_read("accident_2013.csv.bz2")
+}
 }
 

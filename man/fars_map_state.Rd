@@ -21,8 +21,10 @@ are no accidents for the data selected the function doesn't plot anything
 and a message is shown in the console.
 }
 \examples{
-fars_map_state(20, 2014)
-fars_map_state(31, 2015)
+
+\dontrun{
+fars_map_state(20, 2013)
+}
 
 }
 

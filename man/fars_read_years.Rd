@@ -20,9 +20,11 @@ Creates a list of data.frames with month and year of accidents
 loaded from a collection of files from FARS.
 }
 \examples{
+
+\dontrun{
 fars_read_years(c(2013, 2014))
-fars_read_years(c("2014", "2015"))
-fars_read_years(2012)
+fars_read_years(c("2014"))
+}
 
 }
 

@@ -19,9 +19,12 @@ data.frame with the total number of accidents for every month and
 Comptutes the total number of accidens from FARS data for given years
 }
 \examples{
+
+\dontrun{
 fars_summarize_years(c("2013", "2014"))
 fars_summarise_years(2015)
 fars_summarise_years(2012)
+}
 
 }
 
