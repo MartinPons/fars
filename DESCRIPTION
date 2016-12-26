@@ -2,10 +2,10 @@ Package: fars
 Title: Summarise and plot data from FARS data base
 Version: 1.0
 Author: Martín Pons
-Description: What the package does (one paragraph).
+Description: Provides functions that take data from FARS data base and summarise and plot it 
 Depends:
     R (>= 3.3.1)
-License: What license is it under?
+License: GLP (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
@@ -13,3 +13,6 @@ Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
 Imports: dplyr, maps, graphics, readr, tidyr, graphics
+Maintainer: Martin Pons
+URL: https://github.com/MartinPons/fars
+
