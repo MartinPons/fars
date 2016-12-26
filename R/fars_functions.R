@@ -41,6 +41,8 @@ fars_read <- function(filename) {
 #' make_filename(2013)
 #' make_filename(2014)
 #' }
+#'
+#' @export
 
 make_filename <- function(year) {
         year <- as.integer(year)

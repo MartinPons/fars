@@ -27,7 +27,7 @@ Reads the data downloaded from the [Fatality Analysis Reporting System (FARS)](h
 
 ### Details
 
-The function searches if the file already exists in the working directoriy. If that's not the case, reads the csv file and returns
+The function searches if the file already exists in the working directoriy. If that is not the case, reads the csv file and returns
 a data frame. The files are compressed in format bz2. The read_csv function from the readr package can handle this format.
 
 ### Function code
