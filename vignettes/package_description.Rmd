@@ -1,7 +1,7 @@
 ---
-title: "FARS package description"
+title: "FARS package"
 author: "Martin Pons"
-date: "`r Sys.Date()`"
+date: "2016-12-25"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{FARS package description}
