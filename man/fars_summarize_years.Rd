@@ -8,7 +8,7 @@ fars_summarize_years(years)
 }
 \arguments{
 \item{years}{vector of four digit years either as numbers or as character strings.
-The years must correspond to one file previously downloaded in the current 
+The years must correspond to one file previously downloaded in the current
 working directory, otherwise the function returns NULL}
 }
 \value{

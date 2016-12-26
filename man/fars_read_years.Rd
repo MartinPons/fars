@@ -8,7 +8,7 @@ fars_read_years(years)
 }
 \arguments{
 \item{years}{vector of four digit years either as numbers or as character strings.
-The years must correspond to one file previously downloaded in the current 
+The years must correspond to one file previously downloaded in the current
 working directory, otherwise the function returns NULL}
 }
 \value{
@@ -20,8 +20,8 @@ Creates a list of data.frames with month and year of accidents
 loaded from a collection of files from FARS.
 }
 \examples{
-fars_read_years(c(2013, 2014)
-fars_read_years(c("2014", "2015")))
+fars_read_years(c(2013, 2014))
+fars_read_years(c("2014", "2015"))
 fars_read_years(2012)
 
 }

@@ -13,12 +13,13 @@ fars_read(filename)
 The function returns a data.frame
 }
 \description{
-Reads the data downloaded from 
+Reads the data downloaded from
 the \href{http://www.nhtsa.gov/Data/Fatality-Analysis-Reporting-System-(FARS)}{Fatality Analysis Reporting System}
 into an R data.frame. A csv.bz2 file must exist in the working directory.
 Otherwise the function throws an error.
 }
 \examples{
+setwd("inst/extdata")
 fars_read(accident_2013.csv.bz2)
 fars_read(accident_2014.csv.bz2)
 }
