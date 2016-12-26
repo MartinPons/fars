@@ -1,0 +1,258 @@
+---
+title: "FARS package description"
+author: "Martin Pons"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{FARS package description}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This package provides functions to summarise and plot data from the [Fatality Analysis Reporting System (FARS)](http://www.nhtsa.gov/Data/Fatality-Analysis-Reporting-System-(FARS))
+
+<br>
+
+# Functions
+
+## Read data downloaded from FARS
+
+### Description
+
+Reads the data downloaded from the [Fatality Analysis Reporting System (FARS)](http://www.nhtsa.gov/Data/Fatality-Analysis-Reporting-System-(FARS)) into an R data.frame. A csv.bz2 file must exist in the working directory. Otherwise the function throws an error.
+
+### Arguments
+
+- **filename**: a character string giving the name of the file to read
+
+### Details
+
+The function searches if the file already exists in the working directoriy. If that's not the case, reads the csv file and returns
+a data frame. The files are compressed in format bz2. The read_csv function from the readr package can handle this format.
+
+### Function code
+
+```{r function code, eval = F}
+fars_read <- function(filename) {
+        if(!file.exists(filename))
+                stop("file '", filename, "' does not exist")
+        data <- suppressMessages({
+                readr::read_csv(filename, progress = FALSE)
+        })
+        dplyr::tbl_df(data)
+}
+```
+
+
+#### Examples
+
+```{r fars_read_examples, eval = F}
+fars_read(accident_2013.csv.bz2)
+```
+
+<br>
+
+## Create a file name for a FARS year
+
+### Description
+This function creates a character string matching a filename downloaded from the FARS data base giving a specific year.
+
+### Arguments
+
+- **year**: four digit year either as a number or as a character string
+
+### Details
+The function uses the sprintf function to construct a filename. As the filenames downloades from FARS only differ in the year, an entire filename can be constructed just providing the year.
+
+This function is not accesible by the user. It is used for other functions in order to make more simple for the user to input the data he wants to read.
+
+### Function code
+```{r make_filename, eval = F}
+make_filename <- function(year) {
+        year <- as.integer(year)
+        sprintf("accident_%d.csv.bz2", year)
+}
+``` 
+
+### Examples
+```{r make_filename_examples, eval = F}
+make_filename(2013)
+make_filename(2014)
+```
+
+<br>
+
+## List months any years for every accident from FARS
+
+### Description
+
+Creates a list of data.frames with month and year of acccidents loaded from a collection of files from FARS
+
+### Arguments
+
+- **years**: vector of four digit years either as numbers or as character strings.The years must correspond to one file previously downloaded in the current working directory, otherwise the function returns NULL
+
+### Details
+
+The function returns a list of data.frames. Each element of the list references an specific year from a FARS file previously downloaded and contains a log from accidents including only year and month information.
+
+This function is not accesible for the user, instead is used as an abstraction in the function fars_summarise_years to summarise accidents for given years.
+
+### Function code
+
+```{r fars_read_years, eval = F}
+fars_read_years <- function(years) {
+        lapply(years, function(year) {
+                file <- make_filename(year)
+                tryCatch({
+                        dat <- fars_read(file)
+                        dplyr::mutate(dat, year = year) %>% 
+                                dplyr::select(MONTH, year)
+                }, error = function(e) {
+                        warning("invalid year: ", year)
+                        return(NULL)
+                })
+        })
+}
+```
+
+### Examples
+```{r fars_read_years_examples, eval = F}
+fars_read_years(c(2013, 2014))
+fars_read_years(c("2014", "2015"))
+fars_read_years(2012)
+```
+
+<br>
+
+## Count accidents for month and year
+
+### Description
+
+Computes the total number of accidents for given years in data taken from FARS.
+
+### Arguments
+
+- **years**: vector of four digit years either as numbers or as character strings.The years must correspond to one file previously downloaded in the current working directory, otherwise the function returns NULL
+
+### Details
+
+The function loads FARS data from different previously downloada files, groups them, and summarises accidents for every month and year. Uses fars_read_years as an abstraction.
+
+### Function code
+
+```{r fars_summarise_years}
+fars_summarize_years <- function(years) {
+        dat_list <- fars_read_years(years)
+        dplyr::bind_rows(dat_list) %>% 
+                dplyr::group_by(year, MONTH) %>% 
+                dplyr::summarize(n = n()) %>%
+                tidyr::spread(year, n)
+}
+```
+
+### Examples
+```{r fars_summarise_years_examples, eval = F}
+fars_summarize_years(c("2013", "2014"))
+fars_summarise_years(2015)
+fars_summarise_years(2012)
+```
+
+<br>
+
+## Plot state accidents
+
+### Description
+
+Draws a map with all the accidents in an specific USA state and year. If there are no accidents for the data selected the function doesn't plot anything and a message is shown in the console.
+
+### Arguments
+
+- **state.num**: a number of a US state either as a number or character string. If the estate number provided is not a valid state number the function throws an error.
+
+- **year**: four digit year either as a number or as a character string
+
+### Details
+
+This functions make use directly or indireclty from functions in this package , and from data previously downloaded from FARS in the working directory, to draw a make for the chosen state plotting the accidents as points in the map.
+
+To draw the map the function uses **map** from the maps package and **points** from the graphics package.
+
+### Function code
+
+```{r fars_map_state, eval = F}
+fars_map_state <- function(state.num, year) {
+        filename <- make_filename(year)
+        data <- fars_read(filename)
+        state.num <- as.integer(state.num)
+
+        if(!(state.num %in% unique(data$STATE)))
+                stop("invalid STATE number: ", state.num)
+        data.sub <- dplyr::filter(data, STATE == state.num)
+        if(nrow(data.sub) == 0L) {
+                message("no accidents to plot")
+                return(invisible(NULL))
+        }
+        is.na(data.sub$LONGITUD) <- data.sub$LONGITUD > 900
+        is.na(data.sub$LATITUDE) <- data.sub$LATITUDE > 90
+        with(data.sub, {
+                maps::map("state", ylim = range(LATITUDE, na.rm = TRUE),
+                          xlim = range(LONGITUD, na.rm = TRUE))
+                graphics::points(LONGITUD, LATITUDE, pch = 46)
+        })
+}
+```
+
+```{r fars_map_state_examples, eval = F}
+fars_map_state(20, 2014)
+fars_map_state(31, 2015)
+```
+
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+
+- Never uses retina figures
+- Has a smaller default figure size
+- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
